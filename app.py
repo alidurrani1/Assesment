@@ -6,6 +6,14 @@ import urllib
 import requests
 from flask_celery import make_celery
 from marshmallow import Schema,fields
+import time 
+from datetime import datetime
+
+
+
+
+
+
 
 
 
@@ -23,6 +31,7 @@ class User(db.Model):
     username = db.Column(db.String(28),nullable=False, unique = True)
     password = db.Column(db.String(28),nullable=False)    
 
+# Creating Database for api   
 
 class Car(db.Model):
     id = db.Column(db.String(30), primary_key=True)
@@ -40,7 +49,7 @@ class Car(db.Model):
         return cls.query.get_or_404(id)
 
 
-
+#creating schema of api by extending it with marshmallow_Schema
 class CarSchema(Schema):
     id = fields.String()
     year = fields.Integer()
@@ -48,16 +57,32 @@ class CarSchema(Schema):
     created_at = fields.String()
     updated_at = fields.String()
 
-# app.config.update(CELERY_CONFIG={
-#     'broker_url': 'redis://localhost',
-#     'result_backend': 'redis://localhost',
-# })
-# celery = make_celery(app)
 
-# @celery.task()
-# def add_together(a, b):
-#     return a + b
+#redis port number on which local server running
+app.config.update(CELERY_CONFIG={
+    'broker_url': 'redis://localhost:6379',
+    'result_backend': 'redis://localhost:6379',
+})
+celery = make_celery(app)
 
+@celery.task(name = 'data_api.store')
+def store(time):
+    now = datetime.now()
+    current_time = now.strftime('%H:%M%S')
+    if current_time == '12:00:00':
+        data = json.loads(requests.get(url, headers=headers).content.decode('utf-8')) # Here you have the data that you need
+        for i in data['results']:
+            check = Car.query.filter_by(id=i['objectId']).first()
+            if check == None:
+                car = Car(id = i['objectId'],year = i['Year'],make = i['Make'],created_at = i['createdAt'], updated_at = i['updatedAt'])
+                db.session.add(car)
+                db.session.commit()      
+            else:
+                pass
+        return 'Stored Completly new data'
+    else:
+        return 'Not a Time for store'
+    
 
 
 
@@ -83,17 +108,23 @@ headers = {
 #created api to display fetched data (with serailizer using marshmallow schema)
 @app.route('/home')
 def index():
+    now = datetime.now()
+    current_time = now.strftime('%H:%M%S')
+    store.delay(current_time)
+    # data = json.loads(requests.get(url, headers=headers).content.decode('utf-8')) # Here you have the data that you need
+
+    # for i in data['results']:
+    #      check = Car.query.filter_by(id=i['objectId']).first()
+    #      if check == None:
+    #         car = Car(id = i['objectId'],year = i['Year'],make = i['Make'],created_at = i['createdAt'], updated_at = i['updatedAt'])
+    #         db.session.add(car)
+    #         db.session.commit()      
+    #      else:
+    #         pass
     # result = add_together.delay(23, 42)
-    data = json.loads(requests.get(url, headers=headers).content.decode('utf-8')) # Here you have the data that you need
-    for i in data['results']:
-         check = Car.query.filter_by(id=i['objectId']).first()
-         if check == None:
-            car = Car(id = i['objectId'],year = i['Year'],make = i['Make'],created_at = i['createdAt'], updated_at = i['updatedAt'])
-            db.session.add(car)
-            db.session.commit()      
-         else:
-            pass
-    cars = Car.get_all()
+    page = request.args.get('page',1,type=int)
+    per_page = request.args.get('per_page',5,type=int)
+    cars = Car.query.all()
     serializer = CarSchema(many = True)
     car_data = serializer.dump(cars)
     return jsonify(
