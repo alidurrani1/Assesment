@@ -1,0 +1,53 @@
+{% extends 'bootstrap.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Home </title>
+</head>
+<body>
+    {% block content %}
+
+    <div class='container'>
+        <div class='row'>
+            <div class='col-12 text-center' >
+            
+        <h1>Registration Page</h1>
+    </div>
+    </div>
+    </div>
+    <div class'row' style='margin-top:5%'>
+        <div class='col-12 text-center'>
+            <form method='POST' action="{{url_for('register')}}">
+                <div class="form-group">
+                    <fieldset class="form-field">
+                        {{ form.username.label }}
+                        {{ form.username }}
+          
+                    </fieldset>
+                    <span style="color: red;">{{ error }}</span>
+          
+                    <fieldset class="form-field">
+                        {{ form.password.label }}
+                        {{ form.password }}
+                    </fieldset>
+                    <fieldset class="form-field">
+                        {{ form.c_password.label }}
+                        {{ form.c_password }}
+                    </fieldset>
+                   
+                <span style='font-size:15px;'> Already a member? click <a href="{{url_for("home")}}">here</a> for Login </span>
+                    <br>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                
+                </div>
+            </form>
+        </div>
+
+    </div>
+    
+    {% endblock content %}
+</body>
+</html>
