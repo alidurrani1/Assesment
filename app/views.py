@@ -20,28 +20,28 @@ class CarSchema(Schema):
 
 # redis port number on which local server running
 
-# def check_token(func):
-#     @wraps(func)
-#     def wrapper(*args, **kwargs):
-#         token = request.args.get('token')
-#         if not token:
-#             return redirect('login')
-#
-#         return func(*args, **kwargs)
-#
-#     return wrapper
+def check_token(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        token = request.args.get('token')
+        if not token:
+            return redirect('/')
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 @app.route('/api')
-# @check_token
+@check_token
 def khan():
     # store.delay()
     # if not session.get('logged-in'):
     #     return redirect('home')
     # else:
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 5, type=int)
-
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 5, type=int)
+    if session['logged_in'] == True:
         cars = Car.query.all()
         serializer = CarSchema(many=True)
         car_data = serializer.dump(cars)
@@ -59,16 +59,12 @@ def home():
         pass_word = form.password.data
         check_user = User.query.filter_by(username=user_name, password=pass_word).first()
         if check_user != None:
-            #Currently Working on JWT
-
-            # session['logged_in'] = True
-            # token = jwt.encode({
-            #     'user': user_name,
-            #     'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=60)
-            # }, app.config['SECRET_KEY'])
-            #
-            # return jsonify({'token': token.encode().decode('utf-8')})
-            return redirect('khan')
+            session['logged_in'] = True
+            session_expiry = datetime.datetime.utcnow() + timedelta(seconds=120)
+            token = jwt.encode({"user": user_name,
+                                "expiration": str(session_expiry)},
+                               app.config['SECRET_KEY'])
+            return redirect('api?token='+token.encode().decode('utf-8'))
         else:
             message = 'check username or password'
             return render_template('home.html', form=form, error=message)

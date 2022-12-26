@@ -23,7 +23,7 @@ app.config.update(CELERY_CONFIG={
 app.config.update(CELERYBEAT_SCHEDULE={
     'say-every-5-seconds': {
         'task': 'store',
-        "schedule": 86400.00,     # 18:00 daily
+        "schedule": 86400.00,
          }
 })
 celery = make_celery(app)
