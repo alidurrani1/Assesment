@@ -14,34 +14,29 @@
         <div class='row'>
             <div class='col-12 text-center' >
             
-        <h1>Registration Page</h1>
+        <h1>Login Page</h1>
     </div>
     </div>
     </div>
-    <div class'row' style='margin-top:5%'>
+    <div class='row' style='margin-top:5%'>
         <div class='col-12 text-center'>
-            <form method='POST' action="{{url_for('register')}}">
+            <form method='POST'>
                 <div class="form-group">
+  {{ form.hidden_tag() }}
                     <fieldset class="form-field">
                         {{ form.username.label }}
                         {{ form.username }}
-          
+
                     </fieldset>
                     <span style="color: red;">{{ error }}</span>
-          
+
                     <fieldset class="form-field">
                         {{ form.password.label }}
                         {{ form.password }}
                     </fieldset>
-                    <fieldset class="form-field">
-                        {{ form.c_password.label }}
-                        {{ form.c_password }}
-                    </fieldset>
-                   
-                <span style='font-size:15px;'> Already a member? click <a href="{{url_for("home")}}">here</a> for Login </span>
-                    <br>
-                    <button type="submit" class="btn btn-primary">Register</button>
-                
+                <span style='font-size:12px;'> Not a member? click <a href="{{url_for("register")}}">here</a> for registration </span>
+                    <div>
+                        {{ form.submit }}                </div>
                 </div>
             </form>
         </div>

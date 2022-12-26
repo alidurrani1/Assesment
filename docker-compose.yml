@@ -1,0 +1,46 @@
+services:
+#    redis:
+#        image: 'bitnami/redis:latest'
+#        environment:
+#                - ALLOW_EMPTY_PASSWORD=yes
+#        container_name: redis3
+#        ports:
+#            - '6379:6379'
+
+    web:
+        build: .
+        container_name: web3
+        ports:
+            - "5000:5000"
+        depends_on:
+            - redis
+
+    redis:
+        image: redis
+        container_name: redis2
+
+    celery:
+        image: celery:3.1
+        container_name: celery7
+        restart: unless-stopped
+        build: .
+        command: celery --app app.task.celery worker --loglevel=info
+
+        depends_on:
+            - redis
+            - web
+        links:
+            - redis
+    CeleryScheduler:
+        image: celery:3.1
+        container_name: celery-schedule
+        restart: unless-stopped
+        build: .
+        command: celery --app app.task.celery beat
+
+        depends_on:
+            - redis
+            - web
+            - celery
+        links:
+            - redis
