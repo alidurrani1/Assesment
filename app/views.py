@@ -10,6 +10,7 @@ from app.task import *
 import datetime
 
 
+
 class CarSchema(Schema):
     id = fields.String()
     year = fields.Integer()
@@ -39,35 +40,38 @@ def khan():
     # if not session.get('logged-in'):
     #     return redirect('home')
     # else:
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 5, type=int)
-    if session['logged_in'] == True:
-        cars = Car.query.all()
-        serializer = CarSchema(many=True)
-        car_data = serializer.dump(cars)
-        return jsonify(
-            car_data
-        )
+    cars = Car.query.all()
+    serializer = CarSchema(many=True)
+    car_data = serializer.dump(cars)
+    return jsonify(
+        car_data
+    )
 
 
 # first interface of web application (login_page)
 @app.route('/', methods=['GET', 'POST'])
 def home():
     form = LoginForm()
+    global session_token
+
     if request.method == 'POST':
         user_name = form.username.data
         pass_word = form.password.data
         check_user = User.query.filter_by(username=user_name, password=pass_word).first()
         if check_user != None:
-            session['logged_in'] = True
+            session['check_user'] = user_name
             session_expiry = datetime.datetime.utcnow() + timedelta(seconds=120)
             token = jwt.encode({"user": user_name,
                                 "expiration": str(session_expiry)},
                                app.config['SECRET_KEY'])
-            return redirect('api?token='+token.encode().decode('utf-8'))
+            session_token = token.encode().decode('utf-8')
+            return redirect('api?token=' + session_token)
         else:
             message = 'check username or password'
             return render_template('home.html', form=form, error=message)
+    else:
+        if "check_user" in session:
+            return redirect('api?token=' + session_token)
     return render_template('home.html', form=form)
 
 
@@ -77,6 +81,8 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
+
+
     if request.method == 'POST':
         user_name = form.username.data
         print(user_name)
