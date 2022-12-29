@@ -26,7 +26,10 @@ def check_token(func):
         try:
             payload = jwt.decode(token, "secret", algorithms=['HS256'])
         except:
-            return jsonify({'ALERT': 'Token Is INvalid'})
+            try:
+                 payload = jwt.decode(token, "refreshtoken", algorithms=['HS256'])
+            except:
+                return "Session Expired Dubara Login Kro"
 
         return func(*args, **kwargs)
 
@@ -71,19 +74,23 @@ def home():
             session_token = token.encode().decode('utf-8')
             refresh_token= refresh_token.encode().decode('utf-8')
             try:
-                return redirect('api?token=' + session_token)
+                 payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
+                 return redirect('api?token=' + session_token)
+
             except:
+                payload = jwt.decode(refresh_token, "refreshtoken", algorithms=['HS256'])
                 return redirect('api?token=' + refresh_token)
-
-
         else:
             message = 'check username or password'
             return render_template('home.html', form=form, error=message)
     else:
         if "check_user" in session:
             try:
+                payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
                 return redirect('api?token=' + session_token)
+
             except:
+                payload = jwt.decode(refresh_token, "refreshtoken", algorithms=['HS256'])
                 return redirect('api?token=' + refresh_token)
     return render_template('home.html', form=form)
 
