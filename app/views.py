@@ -14,26 +14,40 @@ class CarSchema(Schema):
     updated_at = fields.String()
 
 
-# redis port number on which local server running
 
+# redis port number on which local server running
 def check_token(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         token = request.args.get('token')
-
         if not token:
-            return redirect('/')
+            return redirect(url_for('home'))
         try:
             payload = jwt.decode(token, "secret", algorithms=['HS256'])
         except:
             try:
-                 payload = jwt.decode(token, "refreshtoken", algorithms=['HS256'])
+                payload = jwt.decode(token, "refreshtoken", algorithms=['HS256'])
             except:
-                return "Session Expired Dubara Login Kro"
-
+                return redirect(url_for('khan'))
         return func(*args, **kwargs)
-
     return wrapper
+
+
+    #########################################################################################################
+        # try:
+        #     payload = jwt.decode(token, "secret", algorithms=['HS256'])
+        # except:
+        #     print(" checking refrest token ")
+        #
+        # try:
+        #     payload = jwt.decode(token, "refreshtoken", algorithms=['HS256'])
+        # except:
+        #     session.pop('check_user', None)
+        #     return redirect(url_for('home'))
+        # return func(*args, **kwargs)
+    #########################################################################################################
+
+
 
 
 @app.route('/api')
@@ -57,7 +71,7 @@ def home():
     form = LoginForm()
     global session_token
     global refresh_token
-
+    refresh_expiry = datetime.datetime.utcnow() + timedelta(minutes=5)
     if request.method == 'POST':
         user_name = form.username.data
         pass_word = form.password.data
@@ -69,17 +83,16 @@ def home():
                                 "exp": datetime.datetime.utcnow() + timedelta(seconds=5)},
                                "secret", algorithm="HS256")
             refresh_token = jwt.encode({"user": user_name,
-                                "exp": datetime.datetime.utcnow() + timedelta(minutes=5)},
-                               "refreshtoken", algorithm="HS256")
+                                        "exp": datetime.datetime.utcnow() + timedelta(seconds=30)},
+                                       "refreshtoken", algorithm="HS256")
             session_token = token.encode().decode('utf-8')
-            refresh_token= refresh_token.encode().decode('utf-8')
+            refresh_token = refresh_token.encode().decode('utf-8')
             try:
-                 payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
-                 return redirect('api?token=' + session_token)
-
+                payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
+                return redirect('api?token=' + session_token)
             except:
-                payload = jwt.decode(refresh_token, "refreshtoken", algorithms=['HS256'])
                 return redirect('api?token=' + refresh_token)
+
         else:
             message = 'check username or password'
             return render_template('home.html', form=form, error=message)
@@ -90,8 +103,9 @@ def home():
                 return redirect('api?token=' + session_token)
 
             except:
-                payload = jwt.decode(refresh_token, "refreshtoken", algorithms=['HS256'])
-                return redirect('api?token=' + refresh_token)
+                    session.pop('check_user',None)
+                    return redirect('api?token=' + refresh_token)
+
     return render_template('home.html', form=form)
 
 
