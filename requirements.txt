@@ -2,6 +2,7 @@ amqp==5.1.1
 asgiref==3.5.2
 async-timeout==4.0.2
 pyjwt
+flask_mail
 flask_jwt_extended
 bcrypt==3.2.0
 billiard==3.6.4.0

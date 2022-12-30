@@ -3,9 +3,11 @@ from app.forms import *
 from marshmallow import Schema, fields
 from app.models import *
 from app.task import *
+from flask_mail import Mail, Message
 import datetime
 
 
+# Schema For API
 class CarSchema(Schema):
     id = fields.String()
     year = fields.Integer()
@@ -15,7 +17,6 @@ class CarSchema(Schema):
 
 
 
-# redis port number on which local server running
 def check_token(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -30,33 +31,39 @@ def check_token(func):
             except:
                 return redirect(url_for('khan'))
         return func(*args, **kwargs)
+
     return wrapper
 
+# Sending Mail On Login With Unique Link
+def email_sending(link):
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 465
+    app.config['MAIL_USERNAME'] = 'any@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'Any_Password'
+    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USE_SSL'] = True
+    mail = Mail(app)
+    # recipient = 'any@protonmail.com'
+    # subject = 'From PortFolio'
+    # message = 'Email : ' + 'any@gmail.com' + '\n' + 'Phone :' + 'XXXXXXXXX'+ '\n' + 'Name : ' + \
+    #           'Ali Fayyaz Durrani'+ '\n' + 'Message:' + 'this is test message'
+    msg = Message(
+        'Hello',
+        sender='any@gmail.com',
+        recipients=['any@protonmail.com'])
+    msg.body = 'Hello Link For API is ' + '\n' + link
+    mail.send(msg)
 
-    #########################################################################################################
-        # try:
-        #     payload = jwt.decode(token, "secret", algorithms=['HS256'])
-        # except:
-        #     print(" checking refrest token ")
-        #
-        # try:
-        #     payload = jwt.decode(token, "refreshtoken", algorithms=['HS256'])
-        # except:
-        #     session.pop('check_user', None)
-        #     return redirect(url_for('home'))
-        # return func(*args, **kwargs)
-    #########################################################################################################
 
+# redis port number on which local server running
 
 
 
 @app.route('/api')
-@check_token
+@check_token  # Decoratar
 def khan():
-    # store.delay()
-    # if not session.get('logged-in'):
-    #     return redirect('home')
-    # else:
+    # To Fetch Data That is stored in Database From API
+
     cars = Car.query.all()
     serializer = CarSchema(many=True)
     car_data = serializer.dump(cars)
@@ -71,40 +78,59 @@ def home():
     form = LoginForm()
     global session_token
     global refresh_token
-    refresh_expiry = datetime.datetime.utcnow() + timedelta(minutes=5)
     if request.method == 'POST':
         user_name = form.username.data
         pass_word = form.password.data
         check_user = User.query.filter_by(username=user_name, password=pass_word).first()
         if check_user != None:
+            # Storing Session
             session['check_user'] = user_name
-            session_expiry = datetime.datetime.utcnow() + timedelta(seconds=5)
+
+            # Creating Tokens (Access Token) and (Refresh Token)
+
             token = jwt.encode({"user": user_name,
-                                "exp": datetime.datetime.utcnow() + timedelta(seconds=5)},
+                                "exp": datetime.datetime.utcnow() + timedelta(seconds=15)},
                                "secret", algorithm="HS256")
             refresh_token = jwt.encode({"user": user_name,
                                         "exp": datetime.datetime.utcnow() + timedelta(seconds=30)},
                                        "refreshtoken", algorithm="HS256")
+
+            # Decoding Tokens in UTF-8 Standard
             session_token = token.encode().decode('utf-8')
             refresh_token = refresh_token.encode().decode('utf-8')
+
             try:
                 payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
+
+                # For email Sending  Just Uncomment And Put Password in email_sending() Function
+                # email_sending(link = 'http://127.0.0.1:5000/api?token='+session_token)
+
                 return redirect('api?token=' + session_token)
             except:
+
                 return redirect('api?token=' + refresh_token)
+
+        # If Username or Password is Wrong
 
         else:
             message = 'check username or password'
             return render_template('home.html', form=form, error=message)
+
+
+
+    # If Session Is Stored
+
     else:
         if "check_user" in session:
             try:
                 payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
                 return redirect('api?token=' + session_token)
 
+            # If Access Token Session Completed Then User Will be automatically Shifted to Refresh TOken and session pops
+
             except:
-                    session.pop('check_user',None)
-                    return redirect('api?token=' + refresh_token)
+                session.pop('check_user', None)
+                return redirect('api?token=' + refresh_token)
 
     return render_template('home.html', form=form)
 
