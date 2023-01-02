@@ -1,22 +1,14 @@
 from flask import render_template, url_for, redirect, jsonify, request, session
 from app.forms import *
-from marshmallow import Schema, fields
 from app.models import *
 from app.task import *
 from flask_mail import Mail, Message
 import datetime
+from app import refresh_token, session_token
+from app.api import CarSchema
 
 
-# Schema For API
-class CarSchema(Schema):
-    id = fields.String()
-    year = fields.Integer()
-    make = fields.String()
-    created_at = fields.String()
-    updated_at = fields.String()
-
-
-
+# Decorator for Token Validation
 def check_token(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -27,26 +19,17 @@ def check_token(func):
             payload = jwt.decode(token, "secret", algorithms=['HS256'])
         except:
             try:
-                payload = jwt.decode(token, "refreshtoken", algorithms=['HS256'])
+                payload = jwt.decode(token, "refresh_token", algorithms=['HS256'])
             except:
-                return redirect(url_for('khan'))
+                return redirect(url_for('fetch_from_api'))
         return func(*args, **kwargs)
 
     return wrapper
 
+
 # Sending Mail On Login With Unique Link
 def email_sending(link):
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USERNAME'] = 'any@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'Any_Password'
-    app.config['MAIL_USE_TLS'] = False
-    app.config['MAIL_USE_SSL'] = True
     mail = Mail(app)
-    # recipient = 'any@protonmail.com'
-    # subject = 'From PortFolio'
-    # message = 'Email : ' + 'any@gmail.com' + '\n' + 'Phone :' + 'XXXXXXXXX'+ '\n' + 'Name : ' + \
-    #           'Ali Fayyaz Durrani'+ '\n' + 'Message:' + 'this is test message'
     msg = Message(
         'Hello',
         sender='any@gmail.com',
@@ -55,13 +38,10 @@ def email_sending(link):
     mail.send(msg)
 
 
-# redis port number on which local server running
-
-
-
+# API Return Response
 @app.route('/api')
 @check_token  # Decoratar
-def khan():
+def fetch_from_api():
     # To Fetch Data That is stored in Database From API
 
     cars = Car.query.all()
@@ -93,7 +73,7 @@ def home():
                                "secret", algorithm="HS256")
             refresh_token = jwt.encode({"user": user_name,
                                         "exp": datetime.datetime.utcnow() + timedelta(seconds=30)},
-                                       "refreshtoken", algorithm="HS256")
+                                       "refresh_token", algorithm="HS256")
 
             # Decoding Tokens in UTF-8 Standard
             session_token = token.encode().decode('utf-8')
@@ -117,8 +97,7 @@ def home():
             return render_template('home.html', form=form, error=message)
 
 
-
-    # If Session Is Stored
+# If Session Is Stored
 
     else:
         if "check_user" in session:
@@ -126,7 +105,7 @@ def home():
                 payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
                 return redirect('api?token=' + session_token)
 
-            # If Access Token Session Completed Then User Will be automatically Shifted to Refresh TOken and session pops
+# If Access Token Session Completed Then User Will be automatically Shifted to Refresh TOken and session pops
 
             except:
                 session.pop('check_user', None)
@@ -137,18 +116,14 @@ def home():
 
 # register_page of web application
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-
     if request.method == 'POST':
         user_name = form.username.data
-        print(user_name)
         pass_word = form.password.data
         c_password = form.c_password.data
         check_user = User.query.filter_by(username=user_name).first()
-        print(check_user)
         if check_user != None:
             message = 'Username already taken'
             return render_template('register.html', form=form, error=message)
