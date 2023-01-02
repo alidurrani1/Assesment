@@ -1,7 +1,4 @@
-import datetime
-# from app.api import fetch_from_api
-from app.make_celery import make_celery
-from app import *
+from app import celery
 from app.api import fetch_from_api
 
 

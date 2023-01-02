@@ -1,11 +1,9 @@
 from flask import render_template, url_for, redirect, jsonify, request, session
 from app.forms import *
-from app.models import *
-from app.task import *
+from app import *
 from flask_mail import Mail, Message
+from app.api import *
 import datetime
-from app import refresh_token, session_token
-from app.api import CarSchema
 
 
 # Decorator for Token Validation
@@ -74,7 +72,6 @@ def home():
             refresh_token = jwt.encode({"user": user_name,
                                         "exp": datetime.datetime.utcnow() + timedelta(seconds=30)},
                                        "refresh_token", algorithm="HS256")
-
             # Decoding Tokens in UTF-8 Standard
             session_token = token.encode().decode('utf-8')
             refresh_token = refresh_token.encode().decode('utf-8')
@@ -132,7 +129,6 @@ def register():
             return render_template('register.html', form=form, error=message)
         else:
             user = User(username=user_name, password=pass_word)
-            print(user)
             db.session.add(user)
             db.session.commit()
             return redirect(url_for('home'))

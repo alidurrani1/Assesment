@@ -1,8 +1,9 @@
-from flask_sqlalchemy import SQLAlchemy
+from celery.schedules import crontab
 from flask_wtf.csrf import CSRFProtect
+from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from app.make_celery import *
-from celery.schedules import crontab
+from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
@@ -14,7 +15,6 @@ app.config['SECRET_KEY'] = 'Any_Key'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'any@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Any_Password'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 # app.config.update(CELERY_CONFIG={
