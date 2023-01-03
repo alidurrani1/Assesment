@@ -1,9 +1,8 @@
-from flask import render_template, url_for, redirect, jsonify, request, session
-from app.forms import *
 from app import *
-from flask_mail import Mail, Message
 from app.api import *
-import datetime
+from app.forms import LoginForm, RegistrationForm
+from flask import render_template, url_for, redirect, jsonify, request, session
+from flask_mail import Mail, Message
 
 
 # Decorator for Token Validation
@@ -54,7 +53,7 @@ def fetch_from_api():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     form = LoginForm()
-    global session_token
+    session_token = ''
     global refresh_token
     if request.method == 'POST':
         user_name = form.username.data
@@ -66,14 +65,14 @@ def home():
 
             # Creating Tokens (Access Token) and (Refresh Token)
 
-            token = jwt.encode({"user": user_name,
-                                "exp": datetime.datetime.utcnow() + timedelta(seconds=15)},
-                               "secret", algorithm="HS256")
+            session_token = jwt.encode({"user": user_name,
+                                        "exp": datetime.utcnow() + timedelta(seconds=5)},
+                                       "secret", algorithm="HS256")
             refresh_token = jwt.encode({"user": user_name,
-                                        "exp": datetime.datetime.utcnow() + timedelta(seconds=30)},
+                                        "exp": datetime.utcnow() + timedelta(seconds=10)},
                                        "refresh_token", algorithm="HS256")
             # Decoding Tokens in UTF-8 Standard
-            session_token = token.encode().decode('utf-8')
+            session_token = session_token.encode().decode('utf-8')
             refresh_token = refresh_token.encode().decode('utf-8')
 
             try:
@@ -94,7 +93,7 @@ def home():
             return render_template('home.html', form=form, error=message)
 
 
-# If Session Is Stored
+    # If Session Is Stored
 
     else:
         if "check_user" in session:
@@ -102,7 +101,7 @@ def home():
                 payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
                 return redirect('api?token=' + session_token)
 
-# If Access Token Session Completed Then User Will be automatically Shifted to Refresh TOken and session pops
+            # If Access Token Session Completed Then User Will be automatically Shifted to Refresh TOken and session pops
 
             except:
                 session.pop('check_user', None)

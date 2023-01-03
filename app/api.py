@@ -1,9 +1,8 @@
-from app.models import *
-from app import db
-
 import json
-import urllib
 import requests
+import urllib
+
+from app.models import *
 from marshmallow import Schema, fields
 
 
