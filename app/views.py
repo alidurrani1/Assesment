@@ -1,5 +1,6 @@
 from app import *
-from app.api import *
+from app.models import *
+from app.schemas import CarSchema
 from app.forms import LoginForm, RegistrationForm
 from flask import render_template, url_for, redirect, jsonify, request, session
 from flask_mail import Mail, Message
