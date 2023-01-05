@@ -8,21 +8,21 @@
     <title>Login | Home </title>
 </head>
 <body>
-    {% block content %}
+{% block content %}
 
     <div class='container'>
         <div class='row'>
-            <div class='col-12 text-center' >
-            
-        <h1>Login Page</h1>
-    </div>
-    </div>
+            <div class='col-12 text-center'>
+
+                <h1>Login Page</h1>
+            </div>
+        </div>
     </div>
     <div class='row' style='margin-top:5%'>
         <div class='col-12 text-center'>
             <form method='POST'>
                 <div class="form-group">
-  {{ form.hidden_tag() }}
+                    {{ form.hidden_tag() }}
                     <fieldset class="form-field">
                         {{ form.username.label }}
                         {{ form.username }}
@@ -34,7 +34,7 @@
                         {{ form.password.label }}
                         {{ form.password }}
                     </fieldset>
-                <span style='font-size:12px;'> Not a member? click <a href="{{url_for("register")}}">here</a> for registration </span>
+                    <span style='font-size:12px;'> Not a member? click <a href="{{ url_for("register") }}">here</a> for registration </span>
                     <div>
                         {{ form.submit }}                </div>
                 </div>
@@ -42,7 +42,7 @@
         </div>
 
     </div>
-    
-    {% endblock content %}
+
+{% endblock content %}
 </body>
 </html>

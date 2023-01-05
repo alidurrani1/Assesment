@@ -1,0 +1,7 @@
+venv/
+instance/
+database.db
+dump.rdb
+.idea/
+__pycache__/
+celerybeat-schedule

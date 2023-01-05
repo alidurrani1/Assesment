@@ -1,13 +1,12 @@
+import json
+import requests
+import urllib
 
 from app.models import *
-from app import db
-
-import json
-import urllib
-import requests
 
 
 
+# Function for Celery task to fetch data
 def fetch_from_api():
     where = urllib.parse.quote_plus("""
     {

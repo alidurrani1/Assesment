@@ -8,20 +8,20 @@
     <title>Login | Home </title>
 </head>
 <body>
-    {% block content %}
+{% block content %}
 
     <div class='container'>
         <div class='row'>
-            <div class='col-12 text-center' >
-            
-        <h1>Registration Page</h1>
-    </div>
-    </div>
+            <div class='col-12 text-center'>
+
+                <h1>Registration Page</h1>
+            </div>
+        </div>
     </div>
     <div class='row' style='margin-top:5%'>
         <div class='col-12 text-center'>
-            <form method='POST' action="{{url_for('register')}}">
-  {{ form.hidden_tag() }}
+            <form method='POST' action="{{ url_for('register') }}">
+                {{ form.hidden_tag() }}
                 <div class="form-group">
                     <fieldset class="form-field">
                         {{ form.username.label }}
@@ -38,17 +38,17 @@
                         {{ form.c_password.label }}
                         {{ form.c_password }}
                     </fieldset>
-                   
-                <span style='font-size:15px;'> Already a member? click <a href="{{url_for("home")}}">here</a> for Login </span>
+
+                    <span style='font-size:15px;'> Already a member? click <a href="{{ url_for("home") }}">here</a> for Login </span>
                     <br>
                     {{ form.submit }}
-                
+
                 </div>
             </form>
         </div>
 
     </div>
-    
-    {% endblock content %}
+
+{% endblock content %}
 </body>
 </html>

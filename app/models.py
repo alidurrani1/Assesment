@@ -10,7 +10,6 @@ class User(db.Model):
 
 # Creating Database for api
 
-
 class Car(db.Model):
     id = db.Column(db.String(30), primary_key=True)
     year = db.Column(db.Integer, nullable=False)

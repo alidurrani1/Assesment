@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import *
-from wtforms.validators import *
+from wtforms.validators import DataRequired, EqualTo, Length
 
 
 class LoginForm(FlaskForm):
@@ -9,9 +9,9 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
+
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=5, max=10)])
-
     password = PasswordField('Password', validators=[DataRequired()])
     c_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
