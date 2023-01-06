@@ -1,42 +1,55 @@
 services:
-  #    redis:
-  #        image: 'bitnami/redis:latest'
-  #        environment:
-  #                - ALLOW_EMPTY_PASSWORD=yes
-  #        container_name: redis3
-  #        ports:
-  #            - '6379:6379'
+
+  db:
+    image: mysql
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_DATABASE: flask_app
+      MYSQL_ROOT_PASSWORD: a1s2d3f4
+      MYSQL_ROOT_HOST: db
+      MYSQL_PASSWORD: a1s2d3f4
+
+    volumes:
+      - ./mysql_local.cnf:/etc/mysql/conf.d/mysql_local.cnf:ro
+
 
   web:
-    container_name: web3
+    container_name: web
     build: .
     ports:
       - "5000:5000"
+    links:
+      - db
     volumes:
       - .:/app
     depends_on:
       - redis
+      - celery
+      - CeleryScheduler
+      - db
 
   redis:
     image: redis
-    container_name: redis2
+    container_name: redis
     volumes:
       - .:/app
 
+
   celery:
     image: celery:3.1
-    container_name: celery7
+    container_name: celery
     restart: unless-stopped
     working_dir: /app
     volumes:
       - .:/app
     command: celery --app app.task.celery worker --loglevel=info
 
-    depends_on:
-      - redis
-      - web
+
     links:
       - redis
+
+
   CeleryScheduler:
     image: celery:3.1
     build: .
@@ -46,9 +59,7 @@ services:
       - .:/app
     command: celery --app app.task.celery beat
 
-    depends_on:
-      - redis
-      - web
-      - celery
     links:
       - redis
+
+

@@ -14,7 +14,7 @@ RUN  pip install -r requirements.txt
 
 # Bundle app source
 COPY . ./app
-ENV FLASK_APP=app/run.py
+ENV FLASK_APP=run.py
 
 EXPOSE 5000
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]

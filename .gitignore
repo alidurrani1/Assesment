@@ -5,3 +5,5 @@ dump.rdb
 .idea/
 __pycache__/
 celerybeat-schedule
+mysql_local.cnf/
+db/
