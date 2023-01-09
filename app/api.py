@@ -2,8 +2,8 @@ import json
 import requests
 import urllib
 
-from app.models import *
 
+from app.models import Car, db
 
 
 # Function for Celery task to fetch data
@@ -25,7 +25,7 @@ def fetch_from_api():
 
     for i in data['results']:
         check = Car.query.filter_by(id=i['objectId']).first()
-        if check == None:
+        if not check:
             car = Car(id=i['objectId'], year=i['Year'], make=i['Make'], created_at=i['createdAt'],
                       updated_at=i['updatedAt'])
             db.session.add(car)
