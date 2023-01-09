@@ -3,7 +3,8 @@ import requests
 import urllib
 
 
-from app.models import Car, db
+from app import db
+from models import Car
 
 
 # Function for Celery task to fetch data

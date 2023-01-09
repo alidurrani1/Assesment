@@ -5,7 +5,7 @@ from celery.schedules import crontab
 
 class Config(object):
     """
-    Basic Configurations of App
+    Basic Configurations of App with Database
     """
     TESTING = False
     DEBUG = False

@@ -1,11 +1,10 @@
 import jwt
 
-
 from app import *
-from app.models import *
 from app.schemas import CarSchema
 from app.forms import LoginForm, RegistrationForm
 from datetime import datetime, timedelta
+from models import Car, User
 from flask import render_template, url_for, redirect, jsonify, request, session
 from flask_mail import Mail, Message
 from functools import wraps
@@ -46,10 +45,10 @@ def email_sending(link):
     """
     mail = Mail(app)
     msg = Message(
-            'Hello',
-            sender='alidurrani550@gmail.com',
-            recipients=['anonymouspyf@protonmail.com']
-          )
+        'Hello',
+        sender='alidurrani550@gmail.com',
+        recipients=['anonymouspyf@protonmail.com']
+    )
     msg.body = 'Hello Link For API is ' + '\n' + link
     mail.send(msg)
 
@@ -63,12 +62,22 @@ def fetch_from_api():
     After that the function will return all the data stored in database from api.
 
     """
-
-    cars = Car.query.all()
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 5, type=int)
+    cars = Car.query.paginate(page=page, per_page=per_page)
+    meta = {
+        'page': cars.page,
+        'pages': cars.pages,
+        'total_count': cars.total,
+        'prev_page': cars.prev_num,
+        'next_page': cars.next_num,
+        'has_next': cars.has_next,
+        'has_prev': cars.has_prev,
+    }
     serializer = CarSchema(many=True)
     car_data = serializer.dump(cars)
     return jsonify(
-        car_data
+        car_data, meta
     )
 
 
@@ -90,17 +99,17 @@ def home():
         user_name = form.username.data
         pass_word = form.password.data
         check_user = User.query.filter_by(username=user_name, password=pass_word).first()
-        if check_user != None:
+        if check_user:
             # Storing Session
             session['check_user'] = user_name
 
             # Creating Tokens (Access Token) and (Refresh Token)
 
             session_token = jwt.encode({"user": user_name,
-                                        "exp": datetime.utcnow() + timedelta(seconds=5)},
+                                        "exp": datetime.utcnow() + timedelta(seconds=50)},
                                        "secret", algorithm="HS256")
             refresh_token = jwt.encode({"user": user_name,
-                                        "exp": datetime.utcnow() + timedelta(seconds=10)},
+                                        "exp": datetime.utcnow() + timedelta(seconds=110)},
                                        "refresh_token", algorithm="HS256")
             # Decoding Tokens in UTF-8 Standard
             session_token = session_token.encode().decode('utf-8')
@@ -123,7 +132,7 @@ def home():
             return render_template('home.html', form=form, error=message)
 
 
-# If Session Is Stored
+    # If Session Is Stored
 
     else:
         if "check_user" in session:
@@ -131,7 +140,7 @@ def home():
                 payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
                 return redirect('api?token=' + session_token)
 
-# If Access Token Session Completed Then User Will be automatically Shifted to Refresh TOken and session pops
+            # If Access Token Session Completed Then User Will be automatically Shifted to Refresh TOken and session pops
 
             except:
                 session.pop('check_user', None)
