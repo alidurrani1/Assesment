@@ -16,7 +16,6 @@ from models import car_model, user_model
 # })
 
 
-
 with app.app_context():
     db.create_all()
 

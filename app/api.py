@@ -2,7 +2,6 @@ import json
 import requests
 import urllib
 
-
 from app import db
 from models import Car
 
