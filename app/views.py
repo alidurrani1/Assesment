@@ -64,7 +64,7 @@ def fetch_from_api():
     """
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 5, type=int)
-    cars = Car.query.paginate(page=page, per_page=per_page)
+    cars = db.session.query(Car).paginate(page=page, per_page=per_page)
     meta = {
         'page': cars.page,
         'pages': cars.pages,
@@ -98,7 +98,7 @@ def home():
     if request.method == 'POST':
         user_name = form.username.data
         pass_word = form.password.data
-        check_user = User.query.filter_by(username=user_name, password=pass_word).first()
+        check_user = db.session.query(User).filter_by(username=user_name, password=pass_word).first()
         if check_user:
             # Storing Session
             session['check_user'] = user_name
@@ -163,7 +163,7 @@ def register():
         user_name = form.username.data
         pass_word = form.password.data
         c_password = form.c_password.data
-        check_user = User.query.filter_by(username=user_name).first()
+        check_user = db.session.query(User).filter_by(username=user_name).first()
         if check_user:
             message = 'Username already taken'
             return render_template('register.html', form=form, error=message)

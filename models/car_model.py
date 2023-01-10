@@ -1,11 +1,13 @@
-from app import db
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import String, Column, Integer
+from models.base import Base
 
-class Car(db.Model):
-    id = db.Column(db.String(30), primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
-    make = db.Column(db.String(28), nullable=False)
-    created_at = db.Column(db.String(60), nullable=False)
-    updated_at = db.Column(db.String(60), nullable=False)
+class Car(Base):
+    id = Column(String(30), primary_key=True)
+    year = Column(Integer, nullable=False)
+    make = Column(String(28), nullable=False)
+    created_at = Column(String(60), nullable=False)
+    updated_at = Column(String(60), nullable=False)
     __tablename__ = 'car'
 
     def __int__(self, id, year, make, created_at, updated_at):

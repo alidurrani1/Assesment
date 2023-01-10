@@ -1,11 +1,13 @@
-from app import db
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import String, Column, Integer
 
+from models.base import Base
 
 # Creating Database
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(28), nullable=False, unique=True)
-    password = db.Column(db.String(28), nullable=False)
+class User(Base):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(28), nullable=False, unique=True)
+    password = Column(String(28), nullable=False)
     __tablename__ = 'user'
 
     def __int__(self, username, password):
@@ -13,6 +15,5 @@ class User(db.Model):
         self.password = password
 
 
-# Creating Database for api
 
 
