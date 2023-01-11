@@ -13,7 +13,6 @@ services:
     volumes:
       - ./mysql_local.cnf:/etc/mysql/conf.d/mysql_local.cnf:ro
 
-
   web:
     container_name: web
     build: .
@@ -35,7 +34,6 @@ services:
     volumes:
       - .:/app
 
-
   celery:
     image: celery:3.1
     container_name: celery
@@ -43,12 +41,10 @@ services:
     working_dir: /app
     volumes:
       - .:/app
-    command: celery --app app.task.celery worker --loglevel=info
-
+    command: celery --app app.tasks.celery worker --loglevel=info
 
     links:
       - redis
-
 
   CeleryScheduler:
     image: celery:3.1
@@ -57,9 +53,7 @@ services:
     restart: unless-stopped
     volumes:
       - .:/app
-    command: celery --app app.task.celery beat
+    command: celery --app app.tasks.celery beat
 
     links:
       - redis
-
-

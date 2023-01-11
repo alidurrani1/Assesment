@@ -1,8 +1,11 @@
 import jwt
+import logging
+
 
 from app import *
 from app.schemas import CarSchema
 from app.forms import LoginForm, RegistrationForm
+from app.consts import sender, recipients
 from datetime import datetime, timedelta
 from models import Car, User
 from flask import render_template, url_for, redirect, jsonify, request, session
@@ -28,8 +31,10 @@ def check_token(func):
             payload = jwt.decode(token, "secret", algorithms=['HS256'])
         except:
             try:
-                payload = jwt.decode(token, "refresh_token", algorithms=['HS256'])
+                payload = jwt.decode(
+                    token, "refresh_token", algorithms=['HS256'])
             except:
+                logging.critical('session expires')
                 return redirect(url_for('fetch_from_api'))
         return func(*args, **kwargs)
 
@@ -39,6 +44,7 @@ def check_token(func):
 # Sending Mail On Login With Unique Link
 def email_sending(link):
     """
+
     link with the token can be mailed to registered user by using this function.
     just modification will be needed to send email to dynamic recipients.
 
@@ -46,8 +52,8 @@ def email_sending(link):
     mail = Mail(app)
     msg = Message(
         'Hello',
-        sender='alidurrani550@gmail.com',
-        recipients=['anonymouspyf@protonmail.com']
+        sender=sender,
+        recipients=recipients
     )
     msg.body = 'Hello Link For API is ' + '\n' + link
     mail.send(msg)
@@ -58,6 +64,7 @@ def email_sending(link):
 @check_token  # Decorator
 def fetch_from_api():
     """
+
     This view function will execute when the decorator mentioned above validates the token.
     After that the function will return all the data stored in database from api.
 
@@ -85,6 +92,7 @@ def fetch_from_api():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     """
+
     This is the first interface of application that requires two fields username and password.
     If username and password is valid by checking from database then it will generate a session_token and refresh_token.
     The user will be routed to api page with token, token will expire after given time and user will be automatically
@@ -98,7 +106,8 @@ def home():
     if request.method == 'POST':
         user_name = form.username.data
         pass_word = form.password.data
-        check_user = db.session.query(User).filter_by(username=user_name, password=pass_word).first()
+        check_user = db.session.query(User).filter_by(
+            username=user_name, password=pass_word).first()
         if check_user:
             # Storing Session
             session['check_user'] = user_name
@@ -116,14 +125,16 @@ def home():
             refresh_token = refresh_token.encode().decode('utf-8')
 
             try:
-                payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
+                payload = jwt.decode(
+                    session_token, "secret", algorithms=['HS256'])
+                logging.info('User succesfully logged in and is on Session Token')
 
                 # For email Sending  Just Uncomment And Put Password in email_sending() Function
                 # email_sending(link = 'http://127.0.0.1:5000/api?token='+session_token)
 
                 return redirect('api?token=' + session_token)
             except:
-
+                logging.info('User is shifted to Refresh Token')
                 return redirect('api?token=' + refresh_token)
 
         # If Username or Password is Wrong
@@ -131,19 +142,21 @@ def home():
             message = 'check username or password'
             return render_template('home.html', form=form, error=message)
 
-
     # If Session Is Stored
 
     else:
         if "check_user" in session:
             try:
-                payload = jwt.decode(session_token, "secret", algorithms=['HS256'])
+                payload = jwt.decode(
+                    session_token, "secret", algorithms=['HS256'])
                 return redirect('api?token=' + session_token)
 
             # If Access Token Session Completed Then User Will be automatically Shifted to Refresh TOken and session pops
 
             except:
                 session.pop('check_user', None)
+                logging.warning('User is shifted to Refresh Token')
+
                 return redirect('api?token=' + refresh_token)
 
     return render_template('home.html', form=form)
@@ -154,8 +167,10 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """
+
     It's a register route to register a new user.
     This route also validates data ex: username must be unique and password must be same.
+    
     """
 
     form = RegistrationForm()
@@ -163,7 +178,8 @@ def register():
         user_name = form.username.data
         pass_word = form.password.data
         c_password = form.c_password.data
-        check_user = db.session.query(User).filter_by(username=user_name).first()
+        check_user = db.session.query(User).filter_by(
+            username=user_name).first()
         if check_user:
             message = 'Username already taken'
             return render_template('register.html', form=form, error=message)
@@ -174,5 +190,7 @@ def register():
             user = User(username=user_name, password=pass_word)
             db.session.add(user)
             db.session.commit()
+            logging.info('User Succefully Registered')
             return redirect(url_for('home'))
+            
     return render_template('register.html', form=form)
