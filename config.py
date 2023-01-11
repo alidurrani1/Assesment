@@ -5,7 +5,9 @@ from celery.schedules import crontab
 
 class Config(object):
     """
+
     Basic Configurations of App with Database
+    
     """
     TESTING = False
     DEBUG = False
@@ -19,8 +21,11 @@ class Config(object):
 
 class EmailConfigurations(Config):
     """
+
     Email Configurations for App
+
     """
+
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465
     MAIL_USERNAME = 'any_mail@gmail.com'

@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 app.config.from_object(EmailConfigurations)
 db = SQLAlchemy(app)
-from models import car_model, user_model
+from models import car_models, user_models
 
 # app.config.update(CELERY_CONFIG={
 #     'broker_url': 'redis://localhost:6379/0',
