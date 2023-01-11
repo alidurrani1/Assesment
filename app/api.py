@@ -2,8 +2,8 @@ import json
 import requests
 import urllib
 
-
-from app.models import Car, db
+from app import db
+from models import Car
 
 
 # Function for Celery task to fetch data
@@ -24,7 +24,7 @@ def fetch_from_api():
         requests.get(url, headers=headers).content.decode('utf-8'))  # Here you have the data that you need
 
     for i in data['results']:
-        check = Car.query.filter_by(id=i['objectId']).first()
+        check = db.session.query(Car).filter_by(id=i['objectId']).first()
         if not check:
             car = Car(id=i['objectId'], year=i['Year'], make=i['Make'], created_at=i['createdAt'],
                       updated_at=i['updatedAt'])

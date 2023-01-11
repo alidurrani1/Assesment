@@ -7,19 +7,19 @@ from flask_wtf.csrf import CSRFProtect
 app = Flask(__name__)
 app.config.from_object(Config)
 app.config.from_object(EmailConfigurations)
-
 db = SQLAlchemy(app)
+from models import car_model, user_model
+
 # app.config.update(CELERY_CONFIG={
 #     'broker_url': 'redis://localhost:6379/0',
 #     'result_backend': 'redis://localhost:6379/0',
 # })
-from app.models import User, Car
+
 
 with app.app_context():
     db.create_all()
 
 app.config.from_object(CeleryConfigurations)
-
 celery = make_celery(app)
 
 csrf = CSRFProtect()
