@@ -1,7 +1,7 @@
 import json
+import logging
 import requests
 import urllib
-import logging
 
 from app import db
 from models import Car
@@ -28,9 +28,24 @@ def fetch_from_api():
         data = json.loads(
             requests.get(url, headers=headers).content.decode('utf-8'))  # Here you have the data that you need
     except requests.exceptions.HTTPError as err:
-        logging.critical('Bad Request Code')
+        if err.status_code == '401':
+            logging.critical('Unauthorized response from API..')
+        elif err.status_code == '404':
+            logging.critical('No Found response from API..')
+        elif err.status_code == '407':
+            logging.critical('Authentication required from API..')
+        elif err.status_code == '500':
+            logging.critical('Internal Server Error from API..')
+        elif err.status_code == '502':
+            logging.critical('Bad Gateway response from API..')
+        elif err.status_code == '505':
+            logging.critical('HTTP version not supported response from API..')
+        elif err.status_code == '503':
+            logging.critical('Service not available response from API..')
+        else:
+            logging.critical(err.status_code + 'Response from API..')
+        
         return
-        # raise err
 
     for i in data['results']:
         check = db.session.query(Car).filter_by(id=i['objectId']).first()

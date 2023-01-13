@@ -127,7 +127,7 @@ def home():
             try:
                 payload = jwt.decode(
                     session_token, "secret", algorithms=['HS256'])
-                logging.info('User succesfully logged in and is on Session Token')
+                logging.info(f'{user_name} succesfully logged in and is on Session Token')
 
                 # For email Sending  Just Uncomment And Put Password in email_sending() Function
                 # email_sending(link = 'http://127.0.0.1:5000/api?token='+session_token)
