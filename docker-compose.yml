@@ -16,6 +16,7 @@ services:
   web:
     container_name: web
     build: .
+    entrypoint: ./bin/webapp.sh
     ports:
       - "5000:5000"
     links:
@@ -41,19 +42,18 @@ services:
     working_dir: /app
     volumes:
       - .:/app
-    command: celery --app app.tasks.celery worker --loglevel=info
-
+    entrypoint: ./bin/celery.sh
     links:
       - redis
 
   CeleryScheduler:
     image: celery:3.1
     build: .
+    entrypoint: ./bin/celery-scheduler.sh
     container_name: celery-schedule
     restart: unless-stopped
     volumes:
       - .:/app
-    command: celery --app app.tasks.celery beat
 
     links:
       - redis
