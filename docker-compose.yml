@@ -13,10 +13,10 @@ services:
     volumes:
       - ./mysql_local.cnf:/etc/mysql/conf.d/mysql_local.cnf:ro
 
-
   web:
     container_name: web
     build: .
+    entrypoint: ./bin/webapp.sh
     ports:
       - "5000:5000"
     links:
@@ -35,7 +35,6 @@ services:
     volumes:
       - .:/app
 
-
   celery:
     image: celery:3.1
     container_name: celery
@@ -43,23 +42,18 @@ services:
     working_dir: /app
     volumes:
       - .:/app
-    command: celery --app app.task.celery worker --loglevel=info
-
-
+    entrypoint: ./bin/celery.sh
     links:
       - redis
-
 
   CeleryScheduler:
     image: celery:3.1
     build: .
+    entrypoint: ./bin/celery-scheduler.sh
     container_name: celery-schedule
     restart: unless-stopped
     volumes:
       - .:/app
-    command: celery --app app.task.celery beat
 
     links:
       - redis
-
-
