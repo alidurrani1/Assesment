@@ -7,7 +7,7 @@ from app.schemas import CarSchema
 from app.forms import LoginForm, RegistrationForm
 from app.consts import sender, recipients
 from datetime import datetime, timedelta
-from models import Car, User
+from app.models import Car, User
 from flask import render_template, url_for, redirect, jsonify, request, session
 from flask_mail import Mail, Message
 from functools import wraps
@@ -26,6 +26,12 @@ def check_token(func):
     def wrapper(*args, **kwargs):
         token = request.args.get('token')
         if not token:
+            if 'X-API' in request.headers:
+                api_key = request.headers['X-API']
+                if API_KEY == api_key:
+                    return func(*args, **kwargs)
+                else:
+                    return 'Invalid API Key'
             return redirect(url_for('home'))
         try:
             payload = jwt.decode(token, "secret", algorithms=['HS256'])

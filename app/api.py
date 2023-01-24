@@ -4,7 +4,7 @@ import requests
 import urllib
 
 from app import db
-from models import Car
+from app.models import Car
 
 
 # Function for Celery task to fetch data
@@ -16,7 +16,7 @@ def fetch_from_api():
         }
     }
     """)
-    url = 'https://parseapi.back4app.com/classes/Carmodels_Car_Model_List?limit=10&keys=Make,Year&where=%s' % where
+    url = f'https://parseapi.back4app.com/classes/Carmodels_Car_Model_List?limit=10&keys=Make,Year&where={where}'
     headers = {
         # This is your app's application id
         'X-Parse-Application-Id': '1Fq1JQ9T6jfkbcGGOuzGVwMeOaLe6ArsmPKPXvfi',

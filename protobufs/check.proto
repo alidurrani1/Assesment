@@ -1,0 +1,15 @@
+syntax ="proto3";
+service Greeter {
+   rpc greet(ClientRequest) returns (ServerResponse) {}
+}
+
+// The request message containing the user's name.
+message ClientRequest {
+   string from_client = 1;
+   string name = 2;
+}
+
+// The response message containing the greetings
+message ServerResponse {
+   string message = 1;
+}
