@@ -64,7 +64,7 @@ def fetch_from_api():
         check = db.session.query(Car).filter_by(id=i['objectId']).first()
         if not check:
             car = Car(id=i['objectId'], year=i['Year'], make=i['Make'], created_at=i['createdAt'],
-                      updated_at='saldkjaskldj')
+                      updated_at=i['updatedAt'])
             db.session.add(car)
             db.session.commit()
         else:
