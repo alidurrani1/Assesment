@@ -46,12 +46,37 @@ def fetch_from_api():
             logging.critical(err.status_code + 'Response from API..')
         
         return
+    database_data = db.session.query(Car).all()
+    list_sync = []
+    for j in data['results']:
+        try:
+            list_sync.index(j['objectId'])
+        except:
+            list_sync.append(j['objectId'])
 
+    for i in database_data:
+        try:
+            list_sync.index(i.id)
+        except:
+            deleting = db.session.query(Car).filter_by(id = id.i).delete()
+            db.session.commit()
     for i in data['results']:
         check = db.session.query(Car).filter_by(id=i['objectId']).first()
         if not check:
             car = Car(id=i['objectId'], year=i['Year'], make=i['Make'], created_at=i['createdAt'],
-                      updated_at=i['updatedAt'])
+                      updated_at='saldkjaskldj')
             db.session.add(car)
             db.session.commit()
-        
+        else:
+            if check.updated_at == i['updatedAt']:
+                pass
+            else:
+                check.id = i['objectId']
+                check.year = i['Year']
+                check.make = i['Make']
+                check.created_at = i['createdAt']
+                check.updated_at = i['updatedAt']
+                db.session.commit()           
+                print("Data Updated at completed")
+    return 'Data Synced'
+    

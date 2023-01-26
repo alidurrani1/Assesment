@@ -49,7 +49,7 @@ class CeleryConfigurations(Config):
     CELERYBEAT_SCHEDULE = {
         'say-every-5-seconds': {
             'task': 'store',
-            "schedule": crontab(hour='*/24'),
-            # "schedule": 5.00,
+            # "schedule": crontab(hour='*/24'),
+            "schedule": 5.00,
         }
     }

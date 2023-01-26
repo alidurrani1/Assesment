@@ -90,7 +90,7 @@ def fetch_from_api():
     serializer = CarSchema(many=True)
     car_data = serializer.dump(cars)
     return jsonify(
-        car_data, meta
+        car_data
     )
 
 
