@@ -49,6 +49,7 @@ services:
   CeleryScheduler:
     image: celery:3.1
     build: .
+    command: celery --app app.task.celery beat
     entrypoint: ./bin/celery-scheduler.sh
     container_name: celery-schedule
     restart: unless-stopped

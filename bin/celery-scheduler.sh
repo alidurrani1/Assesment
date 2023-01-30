@@ -1,3 +1,3 @@
 #!/bin/sh
-cd /home/ali/Desktop/Assesment/app/
+cd Assesment/app/
 celery --app app.tasks.celery beat

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import String, Column, Integer
-from models.base import Base
+from app.models.base import Base
 
 
 class Car(Base):

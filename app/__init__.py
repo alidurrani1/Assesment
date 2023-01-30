@@ -7,8 +7,9 @@ from flask_wtf.csrf import CSRFProtect
 app = Flask(__name__)
 app.config.from_object(Config)
 app.config.from_object(EmailConfigurations)
+API_KEY = 'this_is-api_key'
 db = SQLAlchemy(app)
-from models import car_models, user_models
+from app.models import car_models, user_models
 
 # app.config.update(CELERY_CONFIG={
 #     'broker_url': 'redis://localhost:6379/0',
